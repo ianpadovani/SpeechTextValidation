@@ -1,12 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="2564ab07-6416-4bb0-9774-dd650209dd20" name="Default Changelist" comment="" />
+    <list default="true" id="2564ab07-6416-4bb0-9774-dd650209dd20" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kernel_gram.py" beforeDir="false" afterPath="$PROJECT_DIR$/kernel_gram.py" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -14,7 +24,7 @@
   <component name="ProjectId" id="1ZkuAVavukYbNVEoBWe0Lenlu5U" />
   <component name="PropertiesComponent">
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="settings.editor.selected.configurable" value="configurable.group.appearance" />
+    <property name="settings.editor.selected.configurable" value="vcs.Git" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -28,7 +38,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.mfcc_extract">
+  <component name="RunManager" selected="Python.kernel_gram">
     <configuration name="kernel_gram" type="PythonConfigurationType" factoryName="Python">
       <module name="SpeechTextValidation" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -99,7 +109,9 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
           </value>
         </entry>
       </map>

@@ -3,13 +3,13 @@ import numpy as np
 import math
 import csv
 import scipy.io.wavfile as wav
-from scipy.spatial.distance import pdist, squareform
+# from scipy.spatial.distance import pdist, squareform
 from scipy.signal import find_peaks
-from python_speech_features import mfcc
+# from python_speech_features import mfcc
 from numpy import load
 from numpy import matlib
 from matplotlib import pyplot as plt
-from matplotlib import cm
+# from matplotlib import cm
 import os
 
 
@@ -27,9 +27,9 @@ def phoneme_boundaries(phn_path, wav_path):
     return boundaries
 
 
-def gaussian_kernel_similarity(v1, v2, h=35):
+def gaussian_kernel_similarity(v1, v2, h=40):
     """Calculates gaussian kernel similarity for two vectors."""
-     # h is Gaussian Kernel Width
+    # h is Gaussian Kernel Width
     euclidean_norm = np.linalg.norm(v1-v2, 2)
     weighted = -(euclidean_norm**2/h**2)
     similarity = np.exp(weighted)
@@ -37,7 +37,7 @@ def gaussian_kernel_similarity(v1, v2, h=35):
     # return np.exp(-np.linalg.norm(v1 - v2, 2) ** 2 / (2. * 1 ** 2))
 
 
-def epsilon_neighbourhood(v1, v2, epsilon, h=35):
+def epsilon_neighbourhood(v1, v2, epsilon, h=40):
     """Returns True if the two frames are in the same neighbourhood and False otherwise."""
     if 1-gaussian_kernel_similarity(v1, v2, h) < epsilon:
         return True
@@ -45,12 +45,12 @@ def epsilon_neighbourhood(v1, v2, epsilon, h=35):
         return False
 
 
-def reachable(matrix, i, epsilon, h=35, k=5):
+def reachable(matrix, i, epsilon, h=40, k=5, w=50):
     """Receives a matrix, the current frame and the epsilon threshold for the current frame.
     Returns the index of the last reachable frame for the current frame."""
     count = 0
     p_boundary = i
-    for j in range(i+1, min(i+50, len(frames))):
+    for j in range(i+1, min(i+w, len(frames))):
         # Check each vector with the current frame's.
         # If not neighbours add to count, set p_boundary to the index of last neighbour.
         # If neighbours, reset count and p_boundary.
@@ -60,12 +60,12 @@ def reachable(matrix, i, epsilon, h=35, k=5):
         else:
             count += 1
 
-        # Check if k is 4.
+        # If count is k, set boundary.
         if count == k:
             return p_boundary
 
     # If no boundary found by end, set last possible frame as boundary.
-    return min(i+50, len(frames)-1)
+    return min(i+w, len(frames)-1)
 
 
 # ------------------- PLOTTING ------------------- #
@@ -117,14 +117,26 @@ def plot_wavespec_boundaries(wav_path, boundaries):
 
 
 # ------------------- SCORING ------------------- #
-def correct_boundaries(manual, predicted, margin=1):
+def correct_boundaries(manual_b, predicted_b, margin=10):
     """Checks every boundary index in predicted to see if there is a manual index within one frame of it."""
     correct = []
-    for index in predicted:
-        for i in range(index - margin, index + margin + 1):
-            if i in manual:
-                correct.append(i)
-                break
+    used = []
+    for index in predicted_b:
+        # Checks exact boundary first
+        if index in manual_b:
+            correct.append(index)
+            used.append(index)
+        else:
+            # Then checks the next closest boundaries until one is found
+            for i in range(0, margin+1):
+                if index+i in manual_b and index+i not in used:
+                    correct.append(index)
+                    used.append(index+i)
+                    break
+                elif index-i in manual_b and index-i not in used:
+                    correct.append(index)
+                    used.append(index+i)
+                    break
     return correct
 
 
@@ -174,49 +186,65 @@ def r_score(manual, predicted):
     r2 = -os+hr-1/math.sqrt(2)
     return 1-((abs(r1)+abs(r2))/2)
 
+
 if __name__ == "__main__":
 
+    # For writing CSV file at the end.
     dict_data = []
-    score_names = ["hit_rate", "false_alarm", "over_segmentation", "F-score", "R-score", "num"]
-    file_types = ["wa1", "wa2", "combined"]
 
-    # CHANGE AS NECESSARY
+    # CSV Headers
+    score_names = ["hit_rate", "false_alarm", "over_segmentation", "F-score", "R-score", "num"]
+    file_types = ["wa1", "wa2", "combined"]  # For looking at head-mounted and desk-mounted mic recordings. WSJCAM0.
+
+    # HYPER PARAMETERS
+    PEAK_HEIGHT = 0.2  # The value below which local minima are considered.
+    K_REACH = 5  # The number of consecutive frames that are not neighbours in order to consider a frame reachable.
+    MIN_WIDTH = 10  # The minimum kernel width of the range that you would like to test.
+    MAX_WIDTH = 100  # The maximum kernel width of the range that you would like to test.
+    WINDOW_CONSTRAINT = 50  # The number of frames that will be considered when calculating similarity.
+
+    # FILE PATHS
     rootdir = r"C:\Users\Ian\Desktop\Corpus\WSJCAM0_Corpus_Full\output\disc3"
     path_file = os.path.join(rootdir, "paths.csv")
 
-    for width in range(10, 101, 10):
+    for width in range(MIN_WIDTH, MAX_WIDTH+1, 10):
         print("CURRENT WIDTH: "+str(width))
+        # Initialising scores dictionary.
         scores = {
             "wa1": {"hit_rate": 0, "false_alarm": 0, "over_segmentation": 0, "F-score": 0, "R-score": 0, "num": 0},
             "wa2": {"hit_rate": 0, "false_alarm": 0, "over_segmentation": 0, "F-score": 0, "R-score": 0, "num": 0},
             "combined": {"hit_rate": 0, "false_alarm": 0, "over_segmentation": 0, "F-score": 0, "R-score": 0, "num": 0}
         }
 
+        # Open CSV file with the recordings' file paths in it.
         with open(path_file) as csv_file:
             reader = csv.DictReader(csv_file)
             for row in reader:
-
+                # Initialising file paths for data corresponding to current recording.
                 npy_path = row["NPY_path"]
                 wav_path = row["WAV_path"]
                 phn_path = wav_path[:-8] + ".phn"
 
+                # Load in feature vectors.
                 frames = load(npy_path)
 
+                # Set up Data Frame to record all info on current recording.
                 frame_info = pd.DataFrame(columns=["mfccs", "start", "end", "boundary", "neighbourhood",
                                                    "n-graph", "epsilon", "reachable"],
                                           index=[i for i in range(0, len(frames))])
 
+                # Sets up empty matrix for kernel-gram similarity and neighbourhood
                 kernel_gram_matrix = matlib.zeros((len(frames), len(frames)))
                 n_graph = []
 
-                # Iterating through frame pairs.
+                # Iterating through pairs of frames.
                 for i in range(0, len(frames)):
                     epsilon_threshold = 0
 
                     # Filling Kernel-Gram matrix with similarities between the frame and itself.
                     kernel_gram_matrix[i, i] = gaussian_kernel_similarity(frames[i], frames[i], width)
 
-                    for j in range(i+1, min(i+50, len(frames))):
+                    for j in range(i+1, min(i+WINDOW_CONSTRAINT, len(frames))):
                         # print(str(i)+", "+str(j)+": "+str(gaussian_kernel_similarity(frames[i], frames[j])))
 
                         # Filling Kernel-Gram matrix with the rest of the similarity pairs.
@@ -226,8 +254,8 @@ if __name__ == "__main__":
                         epsilon_threshold += pair_similarity
 
                     # Finds the last reachable frame for the current frame.
-                    epsilon_threshold /= 50
-                    last_reached = reachable(frames, i, epsilon_threshold, h=width)
+                    epsilon_threshold /= WINDOW_CONSTRAINT
+                    last_reached = reachable(frames, i, epsilon_threshold, h=width, k=K_REACH, w=WINDOW_CONSTRAINT)
 
                     current_n_graph = 0
                     for j in range(i+1, last_reached+1):
@@ -251,8 +279,10 @@ if __name__ == "__main__":
 
                 # Finding predicted boundaries.
                 n_graph = np.asarray(n_graph)
-                predicted = find_peaks(np.negative(n_graph), height=-0.5)[0]
+                predicted = find_peaks(np.negative(n_graph), height=-PEAK_HEIGHT)[0]
 
+                # EVALUATION
+                # Updating scores dictionary for final CSV
                 if wav_path.endswith("wa1.wav"):
                     scores["wa1"]["hit_rate"] += hit_rate(manual, predicted)
                     scores["wa1"]["false_alarm"] += false_alarm_rate(manual, predicted)
@@ -271,6 +301,7 @@ if __name__ == "__main__":
 
                 print(wav_path[-16:]+" complete.")
 
+        # EVALUATION continued
         for item in score_names:
             scores["combined"][item] = scores["wa1"][item] + scores["wa2"][item]
 
@@ -288,6 +319,7 @@ if __name__ == "__main__":
 
             dict_data.append(current_row)
 
+    # Writing results into CSV
     csv_columns = ["type", "kernel-width"]
     csv_columns.extend(score_names)
     with open(os.path.join(rootdir, "results.csv"), "w", encoding="utf-8", newline="") as file:
