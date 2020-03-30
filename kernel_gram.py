@@ -23,6 +23,7 @@ def phoneme_boundaries(phn_path, wav_path):
             line = line.strip()
             line = line.split("\t")
             phonemes.append(tuple(line))
+            # Convert time to equivalent index in MFCC frames.
             boundaries = [round((int(item[1]) / sample_rate) * 100) for item in phonemes]
     return boundaries
 
@@ -70,16 +71,20 @@ def reachable(matrix, i, epsilon, h=40, k=5, w=50):
 
 # ------------------- PLOTTING ------------------- #
 def plot_kernel_gram_boundaries(matrix, boundaries, minima):
+    """Plots a side-by-side comparison of the real boundaries and predicted boundaries over the kernel-gram matrix."""
+    # Sets axes to start at 0.
     plt.rcParams['axes.xmargin'] = 0
     plt.rcParams['axes.ymargin'] = 0
     plt.figure(1)
 
+    # Set up left plot with real boundaries.
     real_boundaries = plt.subplot(121)
     real_boundaries.imshow(matrix, cmap="Greys")
 
     for line in boundaries:
         real_boundaries.axvline(line, c="r")
 
+    # Set up right plot with predicted boundaries.
     predicted_boundaries = plt.subplot(122)
     predicted_boundaries.imshow(matrix, cmap="Greys")
 
@@ -89,14 +94,17 @@ def plot_kernel_gram_boundaries(matrix, boundaries, minima):
 
 
 def plot_wavespec_boundaries(wav_path, boundaries):
+    """Plots the given boundaries over the waveform and spectrogram."""
     # Reads wav and gets sample rate and frames that will make up waveform.
     sample_rate, signal = wav.read(wav_path)
     # For plotting, uses the sample rate to generate time values in seconds.
     time = np.linspace(0, len(signal) / sample_rate, num=len(signal))
 
+    # Sets axes to start at 0.
     plt.rcParams['axes.xmargin'] = 0
     plt.rcParams['axes.ymargin'] = 0
     plt.figure(1)
+
     # Plotting waveform
     waveform = plt.subplot(211)
     waveform.set_xlabel("Time [s]")
