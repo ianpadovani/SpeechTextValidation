@@ -181,18 +181,18 @@ def correct_boundaries(manual_b, predicted_b, margin=10):
     return correct
 
 
-def hit_rate(manual, predicted):
+def hit_rate(manual, predicted, margin=10):
     # No of correct boundaries / No of manual boundaries
     try:
-        return len(correct_boundaries(manual, predicted)) / len(manual)
+        return len(correct_boundaries(manual, predicted, margin)) / len(manual)
     except ZeroDivisionError:
         return 0
 
 
-def false_alarm_rate(manual, predicted):
+def false_alarm_rate(manual, predicted, margin=10):
     # (Total predicted boundaries - Correct) / Total predicted
     try:
-        return (len(predicted) - len(correct_boundaries(manual, predicted))) / len(predicted)
+        return (len(predicted) - len(correct_boundaries(manual, predicted, margin))) / len(predicted)
     except ZeroDivisionError:
         return 0
 
@@ -204,9 +204,9 @@ def over_segmentation(manual, predicted):
         return 0
 
 
-def f_score(manual, predicted):
-    fa = false_alarm_rate(manual, predicted)
-    hr = hit_rate(manual, predicted)
+def f_score(manual, predicted, margin=10):
+    fa = false_alarm_rate(manual, predicted, margin)
+    hr = hit_rate(manual, predicted, margin)
     # print(fa)
     # print(hr)
 
@@ -219,12 +219,12 @@ def f_score(manual, predicted):
         return 0
 
 
-def r_score(manual, predicted):
-    os = over_segmentation(manual, predicted)
-    hr = hit_rate(manual, predicted)
+def r_score(manual, predicted, margin=10):
+    ovs = over_segmentation(manual, predicted)
+    hr = hit_rate(manual, predicted, margin)
 
-    r1 = math.sqrt((1-hr)**2 + os**2)
-    r2 = -os+hr-1/math.sqrt(2)
+    r1 = math.sqrt((1-hr)**2 + ovs**2)
+    r2 = -ovs+hr-1/math.sqrt(2)
     return 1-((abs(r1)+abs(r2))/2)
 
 
@@ -240,9 +240,10 @@ if __name__ == "__main__":
     # HYPER PARAMETERS
     PEAK_HEIGHT = 0.2  # The value below which local minima are considered.
     K_REACH = 5  # The number of consecutive frames that are not neighbours in order to consider a frame reachable.
-    MIN_WIDTH = 40  # The minimum kernel width of the range that you would like to test.
-    MAX_WIDTH = 40  # The maximum kernel width of the range that you would like to test.
+    MIN_WIDTH = 20  # The minimum kernel width of the range that you would like to test.
+    MAX_WIDTH = 60  # The maximum kernel width of the range that you would like to test.
     WINDOW_CONSTRAINT = 50  # The number of frames that will be considered when calculating similarity.
+    CORRECT_MARGIN = 10
 
     # FILE PATHS
     rootdir = r"C:\Users\Ian\Desktop\Corpus\WSJCAM0_Corpus_Full\output\disc3"
@@ -331,19 +332,19 @@ if __name__ == "__main__":
                 # EVALUATION
                 # Updating scores dictionary for final CSV
                 if wav_path.endswith("wa1.wav"):
-                    scores["wa1"]["hit_rate"] += hit_rate(manual, predicted)
-                    scores["wa1"]["false_alarm"] += false_alarm_rate(manual, predicted)
+                    scores["wa1"]["hit_rate"] += hit_rate(manual, predicted, margin=CORRECT_MARGIN)
+                    scores["wa1"]["false_alarm"] += false_alarm_rate(manual, predicted, margin=CORRECT_MARGIN)
                     scores["wa1"]["over_segmentation"] += over_segmentation(manual, predicted)
-                    scores["wa1"]["F-score"] += f_score(manual, predicted)
-                    scores["wa1"]["R-score"] += r_score(manual, predicted)
+                    scores["wa1"]["F-score"] += f_score(manual, predicted, margin=CORRECT_MARGIN)
+                    scores["wa1"]["R-score"] += r_score(manual, predicted, margin=CORRECT_MARGIN)
                     scores["wa1"]["num"] += 1
 
                 elif wav_path.endswith("wa2.wav"):
-                    scores["wa2"]["hit_rate"] += hit_rate(manual, predicted)
-                    scores["wa2"]["false_alarm"] += false_alarm_rate(manual, predicted)
+                    scores["wa2"]["hit_rate"] += hit_rate(manual, predicted, margin=CORRECT_MARGIN)
+                    scores["wa2"]["false_alarm"] += false_alarm_rate(manual, predicted, margin=CORRECT_MARGIN)
                     scores["wa2"]["over_segmentation"] += over_segmentation(manual, predicted)
-                    scores["wa2"]["F-score"] += f_score(manual, predicted)
-                    scores["wa2"]["R-score"] += r_score(manual, predicted)
+                    scores["wa2"]["F-score"] += f_score(manual, predicted, margin=CORRECT_MARGIN)
+                    scores["wa2"]["R-score"] += r_score(manual, predicted, margin=CORRECT_MARGIN)
                     scores["wa2"]["num"] += 1
 
                 print(wav_path[-16:]+" complete.")
