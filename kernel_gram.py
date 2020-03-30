@@ -13,7 +13,7 @@ from matplotlib import pyplot as plt
 import os
 
 
-def phoneme_boundaries(phn_path, wav_path):
+def phoneme_boundaries(phn_path, wav_path, frames=True):
     """Takes the path to a .phn file and extracts the initial boundary for each phoneme."""
     phonemes = []
     sample_rate, signal = wav.read(wav_path)
@@ -23,8 +23,11 @@ def phoneme_boundaries(phn_path, wav_path):
             line = line.strip()
             line = line.split("\t")
             phonemes.append(tuple(line))
-            # Convert time to equivalent index in MFCC frames.
-            boundaries = [round((int(item[1]) / sample_rate) * 100) for item in phonemes]
+            if frames:
+                # Convert time to equivalent index in MFCC frames.
+                boundaries = [round((int(item[1]) / sample_rate) * 100) for item in phonemes]
+            else:
+                boundaries = [int(item[1]) / sample_rate for item in phonemes]
     return boundaries
 
 
@@ -88,8 +91,38 @@ def plot_kernel_gram_boundaries(matrix, boundaries, minima):
     predicted_boundaries = plt.subplot(122)
     predicted_boundaries.imshow(matrix, cmap="Greys")
 
-    for item in minima:
-        predicted_boundaries.axvline(item, c="r")
+    for minimum in minima:
+        predicted_boundaries.axvline(minimum, c="r")
+    plt.show()
+
+
+def plot_spectrogram_comparison(wav_path, boundaries, minima):
+    """Plots a side-by-side comparison of the real boundaries and predicted boundaries over the kernel-gram matrix."""
+    # Reads wav and gets sample rate and frames that will make up waveform.
+    sample_rate, signal = wav.read(wav_path)
+
+    # Sets axes to start at 0.
+    plt.rcParams['axes.xmargin'] = 0
+    plt.rcParams['axes.ymargin'] = 0
+    plt.figure(1)
+
+    # Set up top plot with real boundaries.
+    real_boundaries = plt.subplot(211)
+    real_boundaries.specgram(signal, NFFT=1024, Fs=sample_rate, noverlap=1023)
+    real_boundaries.set_xlabel('Time [s]')
+    real_boundaries.set_ylabel('Frequency [Hz]')
+
+    for line in boundaries:
+        real_boundaries.axvline(line, c="r")
+
+    # Set up bottom plot with predicted boundaries.
+    predicted_boundaries = plt.subplot(212)
+    predicted_boundaries.specgram(signal, NFFT=1024, Fs=sample_rate, noverlap=1023)
+    predicted_boundaries.set_xlabel('Time [s]')
+    predicted_boundaries.set_ylabel('Frequency [Hz]')
+
+    for minimum in minima:
+        predicted_boundaries.axvline(minimum, c="r")
     plt.show()
 
 
@@ -124,7 +157,7 @@ def plot_wavespec_boundaries(wav_path, boundaries):
     plt.show()
 
 
-# ------------------- SCORING ------------------- #
+# ------------------- EVALUATION ------------------- #
 def correct_boundaries(manual_b, predicted_b, margin=10):
     """Checks every boundary index in predicted to see if there is a manual index within one frame of it."""
     correct = []
@@ -207,13 +240,13 @@ if __name__ == "__main__":
     # HYPER PARAMETERS
     PEAK_HEIGHT = 0.2  # The value below which local minima are considered.
     K_REACH = 5  # The number of consecutive frames that are not neighbours in order to consider a frame reachable.
-    MIN_WIDTH = 10  # The minimum kernel width of the range that you would like to test.
-    MAX_WIDTH = 100  # The maximum kernel width of the range that you would like to test.
+    MIN_WIDTH = 40  # The minimum kernel width of the range that you would like to test.
+    MAX_WIDTH = 40  # The maximum kernel width of the range that you would like to test.
     WINDOW_CONSTRAINT = 50  # The number of frames that will be considered when calculating similarity.
 
     # FILE PATHS
     rootdir = r"C:\Users\Ian\Desktop\Corpus\WSJCAM0_Corpus_Full\output\disc3"
-    path_file = os.path.join(rootdir, "paths.csv")
+    path_file = os.path.join(rootdir, "test_paths.csv")
 
     for width in range(MIN_WIDTH, MAX_WIDTH+1, 10):
         print("CURRENT WIDTH: "+str(width))
@@ -283,11 +316,17 @@ if __name__ == "__main__":
                     })
 
                 # Retrieving manual boundaries
-                manual = phoneme_boundaries(phn_path, wav_path)
+                manual = phoneme_boundaries(phn_path, wav_path)  # Frame indices
 
                 # Finding predicted boundaries.
                 n_graph = np.asarray(n_graph)
-                predicted = find_peaks(np.negative(n_graph), height=-PEAK_HEIGHT)[0]
+                predicted = find_peaks(np.negative(n_graph), height=-PEAK_HEIGHT)[0]  # Frame indices
+
+                # FOR SPEC COMPARISON
+                # predicted_time = [item/100 for item in predicted]  # Time indices
+                # manual = phoneme_boundaries(phn_path, wav_path, frames=False)  # Time indices
+                # print(wav_path)
+                # plot_spectrogram_comparison(wav_path, manual, predicted_time)
 
                 # EVALUATION
                 # Updating scores dictionary for final CSV
