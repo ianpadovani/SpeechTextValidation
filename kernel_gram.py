@@ -3,13 +3,10 @@ import numpy as np
 import math
 import csv
 import scipy.io.wavfile as wav
-# from scipy.spatial.distance import pdist, squareform
 from scipy.signal import find_peaks
-# from python_speech_features import mfcc
 from numpy import load
 from numpy import matlib
 from matplotlib import pyplot as plt
-# from matplotlib import cm
 import os
 
 
@@ -21,7 +18,7 @@ def phoneme_boundaries(phn_path, wav_path, frames=True):
     with open(phn_path, "r", encoding="utf-8") as file:
         for line in file:
             line = line.strip()
-            line = line.split("\t")
+            line = line.split()
             phonemes.append(tuple(line))
             if frames:
                 # Convert time to equivalent index in MFCC frames.
@@ -31,17 +28,16 @@ def phoneme_boundaries(phn_path, wav_path, frames=True):
     return boundaries
 
 
-def gaussian_kernel_similarity(v1, v2, h=40):
+def gaussian_kernel_similarity(v1, v2, h=50):
     """Calculates gaussian kernel similarity for two vectors."""
     # h is Gaussian Kernel Width
     euclidean_norm = np.linalg.norm(v1-v2, 2)
-    weighted = -(euclidean_norm**2/h**2)
+    weighted = (-euclidean_norm/h)
     similarity = np.exp(weighted)
     return similarity
-    # return np.exp(-np.linalg.norm(v1 - v2, 2) ** 2 / (2. * 1 ** 2))
 
 
-def epsilon_neighbourhood(v1, v2, epsilon, h=40):
+def epsilon_neighbourhood(v1, v2, epsilon, h=50):
     """Returns True if the two frames are in the same neighbourhood and False otherwise."""
     if 1-gaussian_kernel_similarity(v1, v2, h) < epsilon:
         return True
@@ -52,6 +48,7 @@ def epsilon_neighbourhood(v1, v2, epsilon, h=40):
 def reachable(matrix, i, epsilon, h=40, k=5, w=50):
     """Receives a matrix, the current frame and the epsilon threshold for the current frame.
     Returns the index of the last reachable frame for the current frame."""
+    # h is kernel width, k is number of consecutive frames, w is window constraint.
     count = 0
     p_boundary = i
     for j in range(i+1, min(i+w, len(frames))):
@@ -235,28 +232,30 @@ if __name__ == "__main__":
 
     # CSV Headers
     score_names = ["hit_rate", "false_alarm", "over_segmentation", "F-score", "R-score", "num"]
-    file_types = ["wa1", "wa2", "combined"]  # For looking at head-mounted and desk-mounted mic recordings. WSJCAM0.
+    # file_types = ["wa1", "wa2", "combined"]  # For looking at head-mounted and desk-mounted mic recordings. WSJCAM0.
 
     # HYPER PARAMETERS
     PEAK_HEIGHT = 0.2  # The value below which local minima are considered.
-    K_REACH = 5  # The number of consecutive frames that are not neighbours in order to consider a frame reachable.
-    MIN_WIDTH = 20  # The minimum kernel width of the range that you would like to test.
-    MAX_WIDTH = 60  # The maximum kernel width of the range that you would like to test.
+    K_REACH = 4  # The number of consecutive frames that are not neighbours in order to consider a frame reachable.
+    MIN_WIDTH = 10  # The minimum kernel width of the range that you would like to test.
+    MAX_WIDTH = 100  # The maximum kernel width of the range that you would like to test.
     WINDOW_CONSTRAINT = 50  # The number of frames that will be considered when calculating similarity.
-    CORRECT_MARGIN = 10
+    CORRECT_MARGIN = 1
 
     # FILE PATHS
-    rootdir = r"C:\Users\Ian\Desktop\Corpus\WSJCAM0_Corpus_Full\output\disc3"
-    path_file = os.path.join(rootdir, "test_paths.csv")
+    rootdir = r"C:\Users\Ian\Desktop\OUTPUT"
+    path_file = os.path.join(rootdir, "TEST_paths.csv")
 
     for width in range(MIN_WIDTH, MAX_WIDTH+1, 10):
         print("CURRENT WIDTH: "+str(width))
-        # Initialising scores dictionary.
-        scores = {
-            "wa1": {"hit_rate": 0, "false_alarm": 0, "over_segmentation": 0, "F-score": 0, "R-score": 0, "num": 0},
-            "wa2": {"hit_rate": 0, "false_alarm": 0, "over_segmentation": 0, "F-score": 0, "R-score": 0, "num": 0},
-            "combined": {"hit_rate": 0, "false_alarm": 0, "over_segmentation": 0, "F-score": 0, "R-score": 0, "num": 0}
-        }
+        # Initialising scores dictionary. WSJCAM
+        # scores = {
+        #     "wa1": {"hit_rate": 0, "false_alarm": 0, "over_segmentation": 0, "F-score": 0, "R-score": 0, "num": 0},
+        #     "wa2": {"hit_rate": 0, "false_alarm": 0, "over_segmentation": 0, "F-score": 0, "R-score": 0, "num": 0},
+        #     "combined": {"hit_rate": 0, "false_alarm": 0, "over_segmentation": 0, "F-score": 0, "R-score": 0, "num": 0}
+        # }
+
+        scores = {"hit_rate": 0, "false_alarm": 0, "over_segmentation": 0, "F-score": 0, "R-score": 0, "num": 0}
 
         # Open CSV file with the recordings' file paths in it.
         with open(path_file) as csv_file:
@@ -265,7 +264,7 @@ if __name__ == "__main__":
                 # Initialising file paths for data corresponding to current recording.
                 npy_path = row["NPY_path"]
                 wav_path = row["WAV_path"]
-                phn_path = wav_path[:-8] + ".phn"
+                phn_path = wav_path[:-4] + ".phn"  # CHANGE FOR WSJCAM0
 
                 # Load in feature vectors.
                 frames = load(npy_path)
@@ -323,62 +322,78 @@ if __name__ == "__main__":
                 n_graph = np.asarray(n_graph)
                 predicted = find_peaks(np.negative(n_graph), height=-PEAK_HEIGHT)[0]  # Frame indices
 
-                # FOR SPEC COMPARISON
+                # # FOR SPEC COMPARISON
                 # predicted_time = [item/100 for item in predicted]  # Time indices
-                # manual = phoneme_boundaries(phn_path, wav_path, frames=False)  # Time indices
+                # manual_time = phoneme_boundaries(phn_path, wav_path, frames=False)  # Time indices
                 # print(wav_path)
-                # plot_spectrogram_comparison(wav_path, manual, predicted_time)
+                # plot_kernel_gram_boundaries(kernel_gram_matrix, manual, predicted)
+                # plot_spectrogram_comparison(wav_path, manual_time, predicted_time)
 
-                # EVALUATION
+                # EVALUATION TIMIT
+                scores["hit_rate"] += hit_rate(manual, predicted, margin=CORRECT_MARGIN)
+                scores["false_alarm"] += false_alarm_rate(manual, predicted, margin=CORRECT_MARGIN)
+                scores["over_segmentation"] += over_segmentation(manual, predicted)
+                scores["F-score"] += f_score(manual, predicted, margin=CORRECT_MARGIN)
+                scores["R-score"] += r_score(manual, predicted, margin=CORRECT_MARGIN)
+                scores["num"] += 1
+
+                # EVALUATION WSJCAM
                 # Updating scores dictionary for final CSV
-                if wav_path.endswith("wa1.wav"):
-                    scores["wa1"]["hit_rate"] += hit_rate(manual, predicted, margin=CORRECT_MARGIN)
-                    scores["wa1"]["false_alarm"] += false_alarm_rate(manual, predicted, margin=CORRECT_MARGIN)
-                    scores["wa1"]["over_segmentation"] += over_segmentation(manual, predicted)
-                    scores["wa1"]["F-score"] += f_score(manual, predicted, margin=CORRECT_MARGIN)
-                    scores["wa1"]["R-score"] += r_score(manual, predicted, margin=CORRECT_MARGIN)
-                    scores["wa1"]["num"] += 1
+                # if wav_path.endswith("wa1.wav"):
+                #     scores["wa1"]["hit_rate"] += hit_rate(manual, predicted, margin=CORRECT_MARGIN)
+                #     scores["wa1"]["false_alarm"] += false_alarm_rate(manual, predicted, margin=CORRECT_MARGIN)
+                #     scores["wa1"]["over_segmentation"] += over_segmentation(manual, predicted)
+                #     scores["wa1"]["F-score"] += f_score(manual, predicted, margin=CORRECT_MARGIN)
+                #     scores["wa1"]["R-score"] += r_score(manual, predicted, margin=CORRECT_MARGIN)
+                #     scores["wa1"]["num"] += 1
+                #
+                # elif wav_path.endswith("wa2.wav"):
+                #     scores["wa2"]["hit_rate"] += hit_rate(manual, predicted, margin=CORRECT_MARGIN)
+                #     scores["wa2"]["false_alarm"] += false_alarm_rate(manual, predicted, margin=CORRECT_MARGIN)
+                #     scores["wa2"]["over_segmentation"] += over_segmentation(manual, predicted)
+                #     scores["wa2"]["F-score"] += f_score(manual, predicted, margin=CORRECT_MARGIN)
+                #     scores["wa2"]["R-score"] += r_score(manual, predicted, margin=CORRECT_MARGIN)
+                #     scores["wa2"]["num"] += 1
 
-                elif wav_path.endswith("wa2.wav"):
-                    scores["wa2"]["hit_rate"] += hit_rate(manual, predicted, margin=CORRECT_MARGIN)
-                    scores["wa2"]["false_alarm"] += false_alarm_rate(manual, predicted, margin=CORRECT_MARGIN)
-                    scores["wa2"]["over_segmentation"] += over_segmentation(manual, predicted)
-                    scores["wa2"]["F-score"] += f_score(manual, predicted, margin=CORRECT_MARGIN)
-                    scores["wa2"]["R-score"] += r_score(manual, predicted, margin=CORRECT_MARGIN)
-                    scores["wa2"]["num"] += 1
+                print(wav_path+" complete.")
+        #
+        # # EVALUATION WSJCAM continued
+        # for item in score_names:
+        #     scores["combined"][item] = scores["wa1"][item] + scores["wa2"][item]
+        #
+        # for quality in file_types:
+        #     for score in score_names[:-1]:
+        #         scores[quality][score] /= scores[quality]["num"]
+        #
+        # for quality in file_types:
+        #     current_row = {
+        #         "kernel-width": width,
+        #         "type": quality,
+        #     }
+        #     for score in score_names:
+        #         current_row.update({score: scores[quality][score]})
+        #
+        #     dict_data.append(current_row)
 
-                print(wav_path[-16:]+" complete.")
+        # Evaluation TIMIT continued
+        for score in score_names[:-1]:
+            scores[score] /= scores["num"]
 
-        # EVALUATION continued
-        for item in score_names:
-            scores["combined"][item] = scores["wa1"][item] + scores["wa2"][item]
+        current_row = {
+            "kernel-width": width,
+        }
+        for score in score_names:
+            current_row.update({score: scores[score]})
 
-        for quality in file_types:
-            for score in score_names[:-1]:
-                scores[quality][score] /= scores[quality]["num"]
-
-        for quality in file_types:
-            current_row = {
-                "kernel-width": width,
-                "type": quality,
-            }
-            for score in score_names:
-                current_row.update({score: scores[quality][score]})
-
-            dict_data.append(current_row)
+        dict_data.append(current_row)
 
     # Writing results into CSV
-    csv_columns = ["type", "kernel-width"]
+    csv_columns = ["kernel-width"]
     csv_columns.extend(score_names)
-    with open(os.path.join(rootdir, "results.csv"), "w", encoding="utf-8", newline="") as file:
+    with open(os.path.join(rootdir, "results_d2.csv"), "w", encoding="utf-8", newline="") as file:
         writer = csv.DictWriter(file, fieldnames=csv_columns)
         writer.writeheader()
         writer.writerows(dict_data)
-
-        # for quality in file_types:
-        #     print("\n\n-----------------------------------------"+quality+"-------------------------------------------")
-        #     for score in score_names:
-        #         print(score+": "+str("%.3f" % scores[quality][score]))
 
 
 
