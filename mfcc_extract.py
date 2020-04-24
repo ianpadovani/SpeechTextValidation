@@ -9,15 +9,16 @@ import csv
 def mfcc_extract(wav_path, numpy_path):
     """Takes a sound file, extracts MFCC features and saves them as a numpy file."""
     (rate, sig) = wav.read(wav_path)
-    mfcc_feat = mfcc(sig, rate, nfft=2048, winlen=0.02).tolist()
-    deltas = delta(mfcc_feat, 2).tolist()
-    double_deltas = delta(deltas, 2).tolist()
-
-    for i in range(0, len(mfcc_feat)):
-        mfcc_feat[i].extend(deltas[i])
-        mfcc_feat[i].extend(double_deltas[i])
-
-    mfcc_feat = np.array([np.array(item) for item in mfcc_feat])
+    mfcc_feat = mfcc(sig, rate, nfft=2048, winlen=0.02)
+    # mfcc_feat = mfcc(sig, rate, nfft=2048, winlen=0.02).tolist()
+    # deltas = delta(mfcc_feat, 2).tolist()
+    # double_deltas = delta(deltas, 2).tolist()
+    #
+    # for i in range(0, len(mfcc_feat)):
+    #     mfcc_feat[i].extend(deltas[i])
+    #     mfcc_feat[i].extend(double_deltas[i])
+    #
+    # mfcc_feat = np.array([np.array(item) for item in mfcc_feat])
     save(numpy_path, mfcc_feat)
     print(numpy_path+" generated...")
 

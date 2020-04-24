@@ -178,7 +178,7 @@ def speech_rate(filename):
     speechrate_dictionary = {'dialect': '',
                              'speaker': '',
                              'utterance': '',
-                             'path': file[3],
+                             'path': filename,
                              'nsyll': voicedcount,
                              'npause': npause,
                              'dur(s)': originaldur,
@@ -213,8 +213,6 @@ def get_files():
 if __name__ == "__main__":
     files = get_files()
     print(files)
-    cols = ['dialect', 'speaker', 'utterance', 'path', 'nsyll', 'npause', 'dur(s)', 'phonationtime(s)', 'speechrate(nsyll / dur)', 'articulation '
-            'rate(nsyll / phonationtime)', 'ASD(speakingtime / nsyll)']
     datalist = []
     for file in files:
         print("Processing " + file[3] + "...")
