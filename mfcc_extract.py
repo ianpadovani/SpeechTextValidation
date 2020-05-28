@@ -10,6 +10,7 @@ def mfcc_extract(wav_path, numpy_path):
     """Takes a sound file, extracts MFCC features and saves them as a numpy file."""
     (rate, sig) = wav.read(wav_path)
     mfcc_feat = mfcc(sig, rate, nfft=2048, winlen=0.02)
+    # UNCOMMENT HERE TO INCLUDE DELTAS AND DOUBLE-DELTAS IN FEATURE EXTRACTION
     # mfcc_feat = mfcc(sig, rate, nfft=2048, winlen=0.02).tolist()
     # deltas = delta(mfcc_feat, 2).tolist()
     # double_deltas = delta(deltas, 2).tolist()
@@ -24,6 +25,7 @@ def mfcc_extract(wav_path, numpy_path):
 
 
 if __name__ == "__main__":
+    # CHANGE DIRECTORY AND SECTION HERE
     directory = r"C:\Users\Ian\Desktop\OUTPUT"
     section = "TEST"
     csv_dir = os.path.join(directory, section+"_paths.csv")
@@ -53,6 +55,7 @@ if __name__ == "__main__":
 
                     mfcc_extract(wav_path, numpy_path)
 
+                    # TIMIT
                     current_row = {
                         "Dialect": code,
                         "Speaker": root[-5:],

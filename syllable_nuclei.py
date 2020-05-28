@@ -60,6 +60,8 @@
 # Translated to Python in 2019 by David Feinberg
 # I changed all the variable names so they are human readable
 
+# Minor changes made in 2020 by Ian Padovani, to personalise this for the SpeechTextValidation project.
+
 
 import math
 import os

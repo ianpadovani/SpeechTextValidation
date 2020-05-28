@@ -341,6 +341,7 @@ if __name__ == "__main__":
                 plot_kernel_gram_boundaries(kernel_gram_matrix, manual, predicted)
                 plot_spectrogram_comparison(wav_path, manual_time, predicted_time)
 
+        # UNCOMMENT HERE FOR TIMIT or WSJCAM TESTING
         #         # EVALUATION TIMIT
         #         scores["hit_rate"] += hit_rate(manual, predicted, margin=CORRECT_MARGIN)
         #         scores["false_alarm"] += false_alarm_rate(manual, predicted, margin=CORRECT_MARGIN)
