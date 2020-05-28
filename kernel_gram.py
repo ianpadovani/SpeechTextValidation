@@ -32,7 +32,7 @@ def gaussian_kernel_similarity(v1, v2, h=50):
     """Calculates gaussian kernel similarity for two vectors."""
     # h is Gaussian Kernel Width
     euclidean_norm = np.linalg.norm(v1-v2, 2)
-    weighted = (-euclidean_norm**2/h**2)
+    weighted = -(euclidean_norm**2/h**2)
     similarity = np.exp(weighted)
     return similarity
 
@@ -136,6 +136,7 @@ def plot_kernel_gram_boundaries(matrix, boundaries, minima):
 
     # Set up left plot with real boundaries.
     real_boundaries = plt.subplot(121)
+    real_boundaries.title.set_text("Real Boundaries")
     real_boundaries.imshow(matrix, cmap="Greys")
 
     for line in boundaries:
@@ -143,6 +144,7 @@ def plot_kernel_gram_boundaries(matrix, boundaries, minima):
 
     # Set up right plot with predicted boundaries.
     predicted_boundaries = plt.subplot(122)
+    predicted_boundaries.title.set_text("Predicted Boundaries")
     predicted_boundaries.imshow(matrix, cmap="Greys")
 
     for minimum in minima:
@@ -162,6 +164,7 @@ def plot_spectrogram_comparison(wav_path, boundaries, minima):
 
     # Set up top plot with real boundaries.
     real_boundaries = plt.subplot(211)
+    real_boundaries.title.set_text("Real Boundaries")
     real_boundaries.specgram(signal, NFFT=1024, Fs=sample_rate, noverlap=1023)
     real_boundaries.set_xlabel('Time [s]')
     real_boundaries.set_ylabel('Frequency [Hz]')
@@ -171,12 +174,14 @@ def plot_spectrogram_comparison(wav_path, boundaries, minima):
 
     # Set up bottom plot with predicted boundaries.
     predicted_boundaries = plt.subplot(212)
+    predicted_boundaries.title.set_text("Predicted Boundaries")
     predicted_boundaries.specgram(signal, NFFT=1024, Fs=sample_rate, noverlap=1023)
     predicted_boundaries.set_xlabel('Time [s]')
     predicted_boundaries.set_ylabel('Frequency [Hz]')
 
     for minimum in minima:
         predicted_boundaries.axvline(minimum, c="r")
+    plt.tight_layout()
     plt.show()
 
 
@@ -221,6 +226,7 @@ def correct_boundaries(manual_b, predicted_b, margin=10):
         if index in manual_b:
             correct.append(index)
             used.append(index)
+            break
         else:
             # Then checks the next closest boundaries until one is found
             for i in range(0, margin+1):

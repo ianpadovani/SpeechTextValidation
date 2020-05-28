@@ -2,13 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2564ab07-6416-4bb0-9774-dd650209dd20" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/sound_analysis.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/kernel_gram.py" beforeDir="false" afterPath="$PROJECT_DIR$/kernel_gram.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mfcc_extract.py" beforeDir="false" afterPath="$PROJECT_DIR$/mfcc_extract.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sound_analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/sound_analysis.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/syllable_nuclei.py" beforeDir="false" afterPath="$PROJECT_DIR$/syllable_nuclei.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/venv/pip-selfcheck.json" beforeDir="false" afterPath="$PROJECT_DIR$/venv/pip-selfcheck.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vowel_onset_detection.py" beforeDir="false" afterPath="$PROJECT_DIR$/vowel_onset_detection.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -46,7 +43,28 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.sound_analysis">
+  <component name="RunManager" selected="Python.kernel_gram">
+    <configuration name="EXAMPLE" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="SpeechTextValidation" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/G2PTool" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/G2PTool/EXAMPLE.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="kernel_gram" type="PythonConfigurationType" factoryName="Python">
       <module name="SpeechTextValidation" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -131,27 +149,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="syllable_nuclei" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="SpeechTextValidation" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/syllable_nuclei.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="vowel_onset_detection" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="SpeechTextValidation" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -177,17 +174,17 @@
       <item itemvalue="Python.kernel_gram" />
       <item itemvalue="Python.mfcc_extract" />
       <item itemvalue="Python.vowel_onset_detection" />
-      <item itemvalue="Python.syllable_nuclei" />
       <item itemvalue="Python.normtest" />
       <item itemvalue="Python.sound_analysis" />
+      <item itemvalue="Python.EXAMPLE" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.sound_analysis" />
+        <item itemvalue="Python.EXAMPLE" />
         <item itemvalue="Python.vowel_onset_detection" />
         <item itemvalue="Python.mfcc_extract" />
         <item itemvalue="Python.normtest" />
-        <item itemvalue="Python.syllable_nuclei" />
       </list>
     </recent_temporary>
   </component>

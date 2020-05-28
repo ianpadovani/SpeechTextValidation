@@ -174,7 +174,7 @@ def speech_rate(filename):
     speakingrate = voicedcount / originaldur
     articulationrate = voicedcount / speakingtot
     npause = npauses - 1
-    asd = speakingtot / voicedcount
+    # asd = speakingtot / voicedcount
     speechrate_dictionary = {'dialect': '',
                              'speaker': '',
                              'utterance': '',
@@ -184,8 +184,7 @@ def speech_rate(filename):
                              'dur(s)': originaldur,
                              'phonationtime(s)': intensity_duration,
                              'speechrate(nsyll / dur)': speakingrate,
-                             "articulation rate(nsyll / phonationtime)": articulationrate,
-                             "ASD(speakingtime / nsyll)": asd}
+                             "articulation rate(nsyll / phonationtime)": articulationrate}
     return speechrate_dictionary
 
 
