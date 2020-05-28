@@ -38,6 +38,6 @@ Uses Maltese G2P tool to transcribe prompts and performs further rule-based tran
 The root directory chan be changed at the start of the main method on line 44.
 
 ## References
-Bhati, S., Nayak, S., & Sri Rama Murty, K. (2018). Unsupervised segmentation of speech signals using kernel-gram matrices. In R. Rameshan, C. Arora, &S. Dutta Roy (Eds.), Computer vision, pattern recognition, image processing, and graphics(pp. 139–149). Singapore: Springer Singapore.
+Bhati, S., Nayak, S., & Sri Rama Murty, K. (2018). Unsupervised segmentation of speech signals using kernel-gram matrices. In R. Rameshan, C. Arora, & S. Dutta Roy (Eds.), Computer vision, pattern recognition, image processing, and graphics(pp. 139–149). Singapore: Springer Singapore.
 
 Feinberg, D. R. (2019, Oct). Parselmouth praat scripts in python. OSF. Retrieved from osf.io/6dwr3 doi: 10.17605/OSF.IO/6DWR3
